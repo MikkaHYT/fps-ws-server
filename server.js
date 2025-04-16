@@ -32,12 +32,41 @@ function handleMessage(clientId, message) {
     const parts = message.toString().split('|'); // Ensure message is a string
     const command = parts[0];
 
-    if (command === 'update') {
-        // Broadcast player position and rotation to all other clients
+    if (command === 'spawn') {
+        const playerId = parts[1];
+        const playerName = parts[2];
+        const position = {
+            x: parseFloat(parts[3]),
+            y: parseFloat(parts[4]),
+            z: parseFloat(parts[5]),
+        };
+        const rotation = {
+            x: parseFloat(parts[6]),
+            y: parseFloat(parts[7]),
+            z: parseFloat(parts[8]),
+        };
+
+        console.log(`Spawning new player: ${playerName} (ID: ${playerId}) at position`, position, 'with rotation', rotation);
+        // Handle player spawn logic here (e.g., notify other clients)
         broadcast(message, clientId);
-    } else if (command === 'shoot') {
-        // Notify all other clients about the shooting event
+    } else if (command === 'update') {
+        const playerId = parts[1];
+        const position = {
+            x: parseFloat(parts[2]),
+            y: parseFloat(parts[3]),
+            z: parseFloat(parts[4]),
+        };
+        const rotation = {
+            x: parseFloat(parts[5]),
+            y: parseFloat(parts[6]),
+            z: parseFloat(parts[7]),
+        };
+
+        console.log(`Updating player: ${playerId} to position`, position, 'with rotation', rotation);
+        // Handle player update logic here (e.g., notify other clients)
         broadcast(message, clientId);
+    } else {
+        console.warn(`Unknown command: ${command}`);
     }
 }
 
@@ -50,7 +79,7 @@ function broadcast(message, senderId) {
     });
 }
 
-// Generate a unique ID for each client
+// Generate 3 random numbers
 function generateUniqueId() {
-    return Math.random().toString(36).substr(2, 9);
+    return `${Math.floor(Math.random() * 1000)}-${Math.floor(Math.random() * 1000)}-${Math.floor(Math.random() * 1000)}`;
 }

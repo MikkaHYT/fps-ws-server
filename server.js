@@ -29,7 +29,7 @@ wss.on('connection', (ws) => {
 
 // Handle incoming messages
 function handleMessage(clientId, message) {
-    const parts = message.split('|');
+    const parts = message.toString().split('|'); // Ensure message is a string
     const command = parts[0];
 
     if (command === 'update') {

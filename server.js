@@ -3,16 +3,20 @@ const WebSocket = require('ws');
 // Create a WebSocket server
 const wss = new WebSocket.Server({ port: 25565 });
 
-console.log('WebSocket server is running on ws://localhost:8080');
+console.log('WebSocket server is running on ws://localhost:25565');
 
-// Store connected clients
+// Store connected clients and player data
 const clients = new Map();
+const players = new Map(); // Store player data: { clientId: { playerId, playerName, position, rotation } }
 
 wss.on('connection', (ws) => {
     const clientId = generateUniqueId();
     clients.set(clientId, ws);
 
     console.log(`Client connected: ${clientId}`);
+
+    // Send the list of currently connected players to the new client
+    sendPlayersList(ws);
 
     // Handle incoming messages
     ws.on('message', (message) => {
@@ -24,6 +28,10 @@ wss.on('connection', (ws) => {
     ws.on('close', () => {
         console.log(`Client disconnected: ${clientId}`);
         clients.delete(clientId);
+        players.delete(clientId);
+
+        // Notify other clients about the disconnection
+        broadcast(`disconnect|${clientId}`, clientId);
     });
 });
 
@@ -46,8 +54,12 @@ function handleMessage(clientId, message) {
             z: parseFloat(parts[8]),
         };
 
+        // Store player data
+        players.set(clientId, { playerId, playerName, position, rotation });
+
         console.log(`Spawning new player: ${playerName} (ID: ${playerId}) at position`, position, 'with rotation', rotation);
-        // Handle player spawn logic here (e.g., notify other clients)
+
+        // Broadcast the spawn message to all clients
         broadcast(message, clientId);
     } else if (command === 'update') {
         const playerId = parts[1];
@@ -62,12 +74,31 @@ function handleMessage(clientId, message) {
             z: parseFloat(parts[7]),
         };
 
+        // Update player data
+        if (players.has(clientId)) {
+            players.get(clientId).position = position;
+            players.get(clientId).rotation = rotation;
+        }
+
         console.log(`Updating player: ${playerId} to position`, position, 'with rotation', rotation);
-        // Handle player update logic here (e.g., notify other clients)
+
+        // Broadcast the update message to all clients
         broadcast(message, clientId);
     } else {
         console.warn(`Unknown command: ${command}`);
     }
+}
+
+// Send the list of all currently connected players to a specific client
+function sendPlayersList(ws) {
+    const playerList = Array.from(players.values())
+        .map(({ playerId, playerName, position, rotation }) =>
+            `${playerId}|${playerName}|${position.x}|${position.y}|${position.z}|${rotation.x}|${rotation.y}|${rotation.z}`
+        )
+        .join('|');
+
+    const message = `players|${players.size}|${playerList}`;
+    ws.send(message);
 }
 
 // Broadcast a message to all clients except the sender
@@ -79,7 +110,7 @@ function broadcast(message, senderId) {
     });
 }
 
-// Generate 3 random numbers
+// Generate a unique ID
 function generateUniqueId() {
     return `${Math.floor(Math.random() * 1000)}-${Math.floor(Math.random() * 1000)}-${Math.floor(Math.random() * 1000)}`;
 }

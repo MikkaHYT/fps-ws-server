@@ -110,6 +110,46 @@ function broadcast(message, senderId) {
     });
 }
 
+// Handle disconnect command
+if (command === 'disconnect') {
+    const clientId = parts[1];
+
+    if (clients.has(clientId)) {
+        console.log(`Handling disconnect for client: ${clientId}`);
+        clients.get(clientId).close(); // Close the WebSocket connection
+        clients.delete(clientId);
+        players.delete(clientId);
+
+        // Notify other clients about the disconnection
+        broadcast(`disconnect|${clientId}`, clientId);
+    } else {
+        console.warn(`Client ${clientId} not found for disconnect command`);
+    }
+}
+
+// Handle update_username command
+if (command === 'update_username') {
+    const clientId = parts[1];
+    const newUsername = parts[2];
+
+    if (clients.has(clientId)) {
+        console.log(`Handling username update for client: ${clientId}`);
+
+        // Update the player's username
+        if (players.has(clientId)) {
+            players.get(clientId).playerName = newUsername;
+            console.log(`Updated username for client ${clientId} to ${newUsername}`);
+        } else {
+            console.warn(`Player data not found for client ${clientId}`);
+        }
+
+        // Notify other clients about the username update
+        broadcast(`update_username|${clientId}|${newUsername}`, clientId);
+    } else {
+        console.warn(`Client ${clientId} not found for update_username command`);
+    }
+}
+
 // Generate a unique ID
 function generateUniqueId() {
     return `${Math.floor(Math.random() * 1000)}-${Math.floor(Math.random() * 1000)}-${Math.floor(Math.random() * 1000)}`;

@@ -31,7 +31,8 @@ wss.on('connection', (ws) => {
         players.delete(clientId);
 
         // Notify other clients about the disconnection
-        broadcast(`disconnect|${clientId}`, clientId);
+        const playerId = players.get(clientId).playerId;
+        broadcast(`disconnect|${playerId}`);
     });
 });
 
@@ -118,9 +119,23 @@ function handleMessage(clientId, message) {
             } else {
                 console.warn(`Client ${clientId} not found for update_username command`);
             }
-        } else {
+        } if (command === 'shoot')
+            {
+                playerId = parts[1];
+                posX = float.Parse(parts[2]);
+                posY = float.Parse(parts[3]);
+                posZ = float.Parse(parts[4]);
+                rotX = float.Parse(parts[5]);
+                rotY = float.Parse(parts[6]);
+                rotZ = float.Parse(parts[7]);
+                rotW = float.Parse(parts[8]);
+            
+                // Broadcast the shoot event to all clients
+                shootMessage = "shoot|{playerId}|{posX}|{posY}|{posZ}|{rotX}|{rotY}|{rotZ}|{rotW}";
+                BroadcastToAllClients(shootMessage);
+            } else {
             console.warn(`Unknown command: ${command}`);
-        }
+        } 
 }
 
 // Send the list of all currently connected players to a specific client

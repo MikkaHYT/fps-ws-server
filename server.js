@@ -28,11 +28,17 @@ wss.on('connection', (ws) => {
     ws.on('close', () => {
         console.log(`Client disconnected: ${clientId}`);
         clients.delete(clientId);
-        players.delete(clientId);
 
-        // Notify other clients about the disconnection
-        const playerId = players.get(clientId).playerId;
-        broadcast(`disconnect|${playerId}`);
+        // Check if the client exists in the players map before deleting
+        if (players.has(clientId)) {
+            const playerId = players.get(clientId).playerId;
+            players.delete(clientId);
+
+            // Notify other clients about the disconnection
+            broadcast(`disconnect|${playerId}`);
+        } else {
+            console.warn(`Client ${clientId} was not found in players map during disconnection.`);
+        }
     });
 });
 
@@ -118,28 +124,27 @@ function handleMessage(clientId, message) {
                 broadcast(`update_username|${clientId}|${newUsername}`, clientId);
             } else {
                 console.warn(`Client ${clientId} not found for update_username command`);
-            }
-        if (command === 'shoot') {
-            const playerId = parts[1];
-            const posX = parseFloat(parts[2]);
-            const posY = parseFloat(parts[3]);
-            const posZ = parseFloat(parts[4]);
-            const rotX = parseFloat(parts[5]);
-            const rotY = parseFloat(parts[6]);
-            const rotZ = parseFloat(parts[7]);
-            const rotW = parseFloat(parts[8]);
-
-            console.log(`Player ${playerId} fired a shot from position (${posX}, ${posY}, ${posZ}) with rotation (${rotX}, ${rotY}, ${rotZ}, ${rotW})`);
-
-            // Broadcast the shoot event to all clients
-            const shootMessage = `shoot|${playerId}|${posX}|${posY}|${posZ}|${rotX}|${rotY}|${rotZ}|${rotW}`;
-            broadcast(shootMessage, clientId);
-        } else {
+            } } else if (command === 'shoot') {
+                const playerId = parts[1];
+                const posX = parseFloat(parts[2]);
+                const posY = parseFloat(parts[3]);
+                const posZ = parseFloat(parts[4]);
+                const rotX = parseFloat(parts[5]);
+                const rotY = parseFloat(parts[6]);
+                const rotZ = parseFloat(parts[7]);
+                const rotW = parseFloat(parts[8]);
+    
+                console.log(`Player ${playerId} fired a shot from position (${posX}, ${posY}, ${posZ}) with rotation (${rotX}, ${rotY}, ${rotZ}, ${rotW})`);
+    
+                // Broadcast the shoot event to all clients
+                const shootMessage = `shoot|${playerId}|${posX}|${posY}|${posZ}|${rotX}|${rotY}|${rotZ}|${rotW}`;
+                broadcast(shootMessage, clientId);
+            } else {
                 console.warn(`Unknown command: ${command}`);
             }
         
         }
-}
+
 
 // Send the list of all currently connected players to a specific client
 function sendPlayersList(ws) {

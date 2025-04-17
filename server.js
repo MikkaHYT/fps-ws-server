@@ -119,23 +119,26 @@ function handleMessage(clientId, message) {
             } else {
                 console.warn(`Client ${clientId} not found for update_username command`);
             }
-        } if (command === 'shoot')
-            {
-                playerId = parts[1];
-                posX = float.Parse(parts[2]);
-                posY = float.Parse(parts[3]);
-                posZ = float.Parse(parts[4]);
-                rotX = float.Parse(parts[5]);
-                rotY = float.Parse(parts[6]);
-                rotZ = float.Parse(parts[7]);
-                rotW = float.Parse(parts[8]);
-            
-                // Broadcast the shoot event to all clients
-                shootMessage = "shoot|{playerId}|{posX}|{posY}|{posZ}|{rotX}|{rotY}|{rotZ}|{rotW}";
-                BroadcastToAllClients(shootMessage);
-            } else {
-            console.warn(`Unknown command: ${command}`);
-        } 
+        if (command === 'shoot') {
+            const playerId = parts[1];
+            const posX = parseFloat(parts[2]);
+            const posY = parseFloat(parts[3]);
+            const posZ = parseFloat(parts[4]);
+            const rotX = parseFloat(parts[5]);
+            const rotY = parseFloat(parts[6]);
+            const rotZ = parseFloat(parts[7]);
+            const rotW = parseFloat(parts[8]);
+
+            console.log(`Player ${playerId} fired a shot from position (${posX}, ${posY}, ${posZ}) with rotation (${rotX}, ${rotY}, ${rotZ}, ${rotW})`);
+
+            // Broadcast the shoot event to all clients
+            const shootMessage = `shoot|${playerId}|${posX}|${posY}|${posZ}|${rotX}|${rotY}|${rotZ}|${rotW}`;
+            broadcast(shootMessage, clientId);
+        } else {
+                console.warn(`Unknown command: ${command}`);
+            }
+        
+        }
 }
 
 // Send the list of all currently connected players to a specific client

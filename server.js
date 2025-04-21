@@ -16,7 +16,7 @@ wss.on('connection', (ws) => {
     console.log(`Client connected: ${clientId}`);
 
     // Send the list of currently connected players to the new client
-    print("Sending players list to new client...");
+    console.log("Sending players list to new client...");
     sendPlayersList(ws);
 
     // Handle incoming messages

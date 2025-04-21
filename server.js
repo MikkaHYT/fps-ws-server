@@ -117,6 +117,12 @@ function handleMessage(clientId, message) {
                 if (players.has(clientId)) {
                     players.get(clientId).playerName = newUsername;
                     console.log(`Updated username for client ${clientId} to ${newUsername}`);
+                    // Update the player's username in the players map
+                    players.set(clientId, {
+                        ...players.get(clientId),
+                        playerName: newUsername
+                    });
+                    console.log('Updated players map:', Array.from(players.entries()));
                 } else {
                     console.warn(`Player data not found for client ${clientId}`);
                 }
@@ -149,6 +155,11 @@ function handleMessage(clientId, message) {
                 // Notify all clients about the hit event
                 const hitMessage = `hit|${shooterId}|${targetId}`;
                 broadcast(hitMessage, clientId);
+            } else if (command === 'heartbeat') {
+                // Handle heartbeat message
+                console.log(`Heartbeat received from client ${clientId}`);
+                // Optionally, you can send a heartbeat response back to the client
+                clients.get(clientId)?.send(`heartbeat`);
             } else {
                 console.warn(`Unknown command: ${command}`);
             }

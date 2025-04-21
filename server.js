@@ -121,9 +121,9 @@ function handleMessage(clientId, message) {
                 }
 
                 // Notify other clients about the username update
-                broadcast(`update_username|${clientId}|${newUsername}`, clientId);
+                broadcast(`update_username|${clientId}|${newUsername}`);
             } else {
-                console.warn(`Client ${clientId} not found for update_username command`);
+                broadcast(`update_username|${clientId}|${newUsername}`);
             } } else if (command === 'shoot') {
                 const playerId = parts[1];
                 const posX = parseFloat(parts[2]);

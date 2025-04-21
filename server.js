@@ -139,6 +139,15 @@ function handleMessage(clientId, message) {
                 // Broadcast the shoot event to all clients
                 const shootMessage = `shoot|${playerId}|${posX}|${posY}|${posZ}|${rotX}|${rotY}|${rotZ}|${rotW}`;
                 broadcast(shootMessage, clientId);
+            } else if (command === 'hit') {
+                const shooterId = parts[1];
+                const targetId = parts[2];
+
+                console.log(`Player ${shooterId} hit player ${targetId}`);
+
+                // Notify all clients about the hit event
+                const hitMessage = `hit|${shooterId}|${targetId}`;
+                broadcast(hitMessage, clientId);
             } else {
                 console.warn(`Unknown command: ${command}`);
             }

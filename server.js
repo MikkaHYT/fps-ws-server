@@ -8,6 +8,7 @@ console.log('WebSocket server is running on ws://localhost:25565');
 // Store connected clients and player data
 const clients = new Map();
 const players = new Map(); // Store player data: { clientId: { playerId, playerName, position, rotation } }
+const playerIdCounter = 0; // Counter for generating unique player IDs
 
 wss.on('connection', (ws) => {
     const clientId = generateUniqueId();
@@ -175,6 +176,7 @@ function sendPlayersList(ws) {
         )
         .join('|');
 
+    ws.send(`playerId|${playerIdCounter}`);
     const message = `players|${players.size}|${playerList}`;
     ws.send(message);
     console.log(`Sent players list to new client: ${message}`);
@@ -191,5 +193,7 @@ function broadcast(message, senderId) {
 
 // Generate a unique ID
 function generateUniqueId() {
-    return `${Math.floor(Math.random() * 1000)}-${Math.floor(Math.random() * 1000)}-${Math.floor(Math.random() * 1000)}`;
+    // Increment the counter for each new ID
+    playerIdCounter = playerIdCounter+1;
+    return `${playerIdCounter}`; // Increment the counter for each new ID
 }

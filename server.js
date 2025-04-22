@@ -8,7 +8,7 @@ console.log('WebSocket server is running on ws://localhost:25565');
 // Store connected clients and player data
 const clients = new Map();
 const players = new Map(); // Store player data: { clientId: { playerId, playerName, position, rotation } }
-const playerIdCounter = 0; // Counter for generating unique player IDs
+var playerIdCounter = 0; // Counter for generating unique player IDs
 
 wss.on('connection', (ws) => {
     const clientId = generateUniqueId();

@@ -181,6 +181,15 @@ function handleMessage(clientId, message) {
         console.log(`Heartbeat received from client ${clientId}`);
         // Optionally, you can send a heartbeat response back to the client
         clients.get(clientId)?.send(`heartbeat`);
+    } else if (command === 'death') {
+        const playerId = parts[1];
+        const killerId = parts[2];
+
+        console.log(`Player ${playerId} was killed by player ${killerId}`);
+
+        // Notify all clients about the death event
+        const deathMessage = `death|${playerId}|${killerId}`;
+        broadcast(deathMessage, clientId);
     } else {
         console.warn(`Unknown command: ${command}`);
     }
